@@ -1,8 +1,12 @@
 package com.example.ahmed.soonami3;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -39,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     ListView listView;
     TextView empty;
     String data;
+    ArrayList<Event> allEvents;
 
     private OkHttpClient client;
 
@@ -47,14 +52,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        listView = (ListView)findViewById(R.id.listview);
-        empty = (TextView)findViewById(R.id.empty);
+        listView = findViewById(R.id.listview);
+        empty = findViewById(R.id.empty);
         listView.setEmptyView(empty);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String url = allEvents.get(position).getUrl();
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(url));
+                startActivity(intent);
+            }
+        });
 
         getWebservice();
     }
-
-
 
 
     private void getWebservice() {
@@ -70,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             }
-
+            
             @Override
             public void onResponse(final Response response) throws IOException {
                 runOnUiThread(new Runnable() {
@@ -91,11 +103,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
     private ArrayList<Event>  extractFeatureFromJson(String earthquakeJSON) {
         Event currentEvent ;
-        ArrayList<Event> allEvents = new ArrayList<>();
+        allEvents = new ArrayList<>();
         try {
             JSONObject baseJsonResponse = new JSONObject(earthquakeJSON);
             JSONArray featureArray = baseJsonResponse.getJSONArray("features");
@@ -107,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject currentFeature = featureArray.getJSONObject(i);
                     JSONObject properties = currentFeature.getJSONObject("properties");
                     currentEvent = new Event(properties.getString("title"),
-                            properties.getLong("time"),properties.getInt("tsunami"));
+                            properties.getLong("time"),properties.getInt("tsunami") ,properties.getString("url") );
                     allEvents.add(currentEvent);
                 }
                 return allEvents;
@@ -126,8 +136,6 @@ public class MainActivity extends AppCompatActivity {
         EventAdapter adapter = new EventAdapter( this , allEvents);
         listView.setAdapter(adapter);
     }
-
-
 
 
 }
