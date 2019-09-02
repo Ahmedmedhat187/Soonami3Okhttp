@@ -1,7 +1,7 @@
 # Soonami3Okhttp
 
 
-This is Soonami app it git data from api as JSON and parse it in Listview using OkHttpClient library
+This Soonami app using OkHttp library to fetch earthquakes data from api and parse it to json to display it in listview
 
 I use in this project:
 
